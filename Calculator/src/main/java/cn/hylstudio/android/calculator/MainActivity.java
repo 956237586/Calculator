@@ -23,6 +23,6 @@ public class MainActivity extends Activity {
      * 初始化所有控件
      */
     private void init() {
-
+        Button btn_test = (Button) findViewById(R.id.btn_unit_conversion_convert);
     }
 }
