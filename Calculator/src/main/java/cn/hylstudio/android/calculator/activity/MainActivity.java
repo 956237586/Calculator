@@ -3,6 +3,7 @@ package cn.hylstudio.android.calculator.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.webkit.JavascriptInterface;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hylstudio.android.calculator.model.Result;
 import cn.hylstudio.android.calculator.presenter.MainPresenter;
 import cn.hylstudio.android.calculator.viewinterface.MainView;
 
@@ -29,7 +31,10 @@ import cn.hylstudio.android.calculator.viewinterface.MainView;
 public class MainActivity extends Activity implements MainView {
     public static final String TAG = "calculator_Main";
 
+
     //所有视图控件
+    private Button btn_toConvertion;
+
     private Button btn_0;
     private Button btn_1;
     private Button btn_2;
@@ -56,29 +61,26 @@ public class MainActivity extends Activity implements MainView {
     //控件数据
     private List<Button> buttons;
 
-    private Handler handler;
-    private WebView calcu;
+    //presenter
+    private MainPresenter presenter;
 
     @SuppressLint("JavascriptInterface")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.test);
-
-//        calcu.loadUrl("javascript:handler.calcu(eval('1+2*3'))");
         setContentView(R.layout.activity_main);
         initViews();
-        handler = new Handler();
+        presenter = new MainPresenter(this);
     }
 
 
     /**
      * 初始化所有控件
      */
-
     @Override
     public void initViews() {
         buttons = new ArrayList<>();
+        btn_toConvertion = (Button) findViewById(R.id.btn_calculator_to_unit_convert);
         btn_0 = (Button) findViewById(R.id.btn_0);
         btn_1 = (Button) findViewById(R.id.btn_1);
         btn_2 = (Button) findViewById(R.id.btn_2);
@@ -96,6 +98,7 @@ public class MainActivity extends Activity implements MainView {
         btn_mul = (Button) findViewById(R.id.btn_mul);
         btn_div = (Button) findViewById(R.id.btn_div);
         btn_del = (Button) findViewById(R.id.btn_del);
+        buttons.add(btn_toConvertion);
         buttons.add(btn_0);
         buttons.add(btn_1);
         buttons.add(btn_2);
@@ -118,10 +121,7 @@ public class MainActivity extends Activity implements MainView {
         }
 
         tv_result = (TextView) findViewById(R.id.tv_calcu_result);
-        calcu = (WebView) findViewById(R.id.wv_calcu);
-        calcu.getSettings().setJavaScriptEnabled(true);
-        calcu.getSettings().setDomStorageEnabled(true);
-        calcu.addJavascriptInterface(new MyHandler(), "handler");
+
     }
 
     @Override
@@ -142,18 +142,6 @@ public class MainActivity extends Activity implements MainView {
     @Override
     public void del() {
         tv_result.setText("");
-//        String num = tv_result.getText().toString();
-//        if (!num.equals("")) {
-//            char lastChar = num.charAt(num.length() - 1);
-//            if (lastChar == '.') {
-//                setDotInputEnable(true);
-//            } else {
-//                if (lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/') {
-//                    setOPInputEnable(true);
-//                }
-//            }
-//            tv_result.setText(num.substring(0, num.length() - 1));
-//        }
     }
 
     @Override
@@ -207,103 +195,31 @@ public class MainActivity extends Activity implements MainView {
                     update(9);
                     break;
                 case R.id.btn_dot:
-//                    if (!isDotPressed) {
-//                        setDotInputEnable(false);
-//                    }
                     update('.');
                     break;
                 case R.id.btn_enter:
-                    calcu.loadUrl("javascript:handler.calcu(eval('" + tv_result.getText() + "'))");
-
-//                    Result r = presenter.calcu(tv_result.getText() + "");
-//                    if (r.type == Result.SUCCESS) {
-//                        tv_result.setText(r.msg);
-//                    } else {
-//
-//                    }
-//                    int index = 0;
-//                    String s = tv_result.getText() + "";
-//                    Log.d(TAG, "s = " + s);
-//                    switch (presenter.getOP()) {
-//                        case Calculator.OP_ADD:
-//                            index = s.indexOf('+');
-//                            break;
-//                        case Calculator.OP_SUB:
-//                            index = s.indexOf('-');
-//                            break;
-//                        case Calculator.OP_MUL:
-//                            index = s.indexOf('*');
-//                            break;
-//                        case Calculator.OP_DIV:
-//                            index = s.indexOf('/');
-//                            break;
-//                    }
-//                    Log.d(TAG, "index = " + index);
-//                    if (index != 0) {
-//                        s = s.substring(index + 1);
-//                        Log.d(TAG, "s = " + s);
-//                        setOPInputEnable(true);
-//                        presenter.setNum2(Double.parseDouble(s));
-//                        Result result = presenter.calcu();
-//                        if (result.type == Result.SUCCESS) {
-//                            tv_result.setText(result.msg);
-//                            presenter.setNum1(Double.parseDouble(result.msg));
-//                        }
-//                    }
+                    presenter.calcu(tv_result.getText() + "");
                     break;
                 case R.id.btn_add:
-//                    presenter.setNum1(Double.parseDouble(tv_result.getText().toString()));
                     update('+');
-//                    presenter.setOP(Calculator.OP_ADD);
-//                    setOPInputEnable(false);
-//                    setDotInputEnable(true);
                     break;
                 case R.id.btn_sub:
-//                    presenter.setNum1(Double.parseDouble(tv_result.getText().toString()));
                     update('-');
-//                    presenter.setOP(Calculator.OP_SUB);
-//                    setOPInputEnable(false);
-//                    setDotInputEnable(true);
                     break;
                 case R.id.btn_mul:
-//                    presenter.setNum1(Double.parseDouble(tv_result.getText().toString()));
                     update('*');
-//                    presenter.setOP(Calculator.OP_MUL);
-//                    setOPInputEnable(false);
-//                    setDotInputEnable(true);
                     break;
                 case R.id.btn_div:
-//                    presenter.setNum1(Double.parseDouble(tv_result.getText().toString()));
                     update('/');
-//                    presenter.setOP(Calculator.OP_DIV);
-//                    setOPInputEnable(false);
-//                    setDotInputEnable(true);
                     break;
                 case R.id.btn_del:
                     del();
                     break;
+                case R.id.btn_calculator_to_unit_convert:
+                    Intent intent = new Intent(MainActivity.this,UnitConversionActivity.class);
+                    startActivity(intent);
+                    break;
             }
-        }
-    }
-
-    private class MyHandler {
-        @JavascriptInterface
-        public void calcu(String data) {
-            Log.d(TAG, "result: " + data);
-            handler.post(new UpdateThread(data));
-        }
-    }
-
-    private class UpdateThread implements Runnable {
-        String data;
-
-        public UpdateThread(String data) {
-            this.data = data;
-        }
-
-        @Override
-        public void run() {
-            update(data);
         }
     }
 

@@ -3,8 +3,6 @@ package cn.hylstudio.android.calculator.model;
 import android.util.Log;
 import android.webkit.WebView;
 
-import java.util.Stack;
-
 /**
  * 计算器后台处理类
  * Created by HYL on 2016/9/8.

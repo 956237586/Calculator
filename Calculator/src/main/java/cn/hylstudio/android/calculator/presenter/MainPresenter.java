@@ -1,8 +1,12 @@
 package cn.hylstudio.android.calculator.presenter;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 
-import cn.hylstudio.android.calculator.model.Calculator;
 import cn.hylstudio.android.calculator.model.Result;
 import cn.hylstudio.android.calculator.viewinterface.MainView;
 
@@ -11,37 +15,78 @@ import cn.hylstudio.android.calculator.viewinterface.MainView;
  * Created by HYL on 2016/9/8.
  */
 public class MainPresenter {
+    public static final String TAG = "MainPresenter";
+
     private MainView mainView;
     private Handler handler;
-    private Calculator calculator;
+    private WebView calculator;
     private Result ret;
 
+    @SuppressLint("SetJavaScriptEnabled")
     public MainPresenter(MainView mainView) {
         this.mainView = mainView;
         handler = new Handler();
-        calculator = new Calculator();
+        calculator = new WebView((Context) mainView);
+        calculator.getSettings().setJavaScriptEnabled(true);
+        calculator.getSettings().setDomStorageEnabled(true);
+        calculator.addJavascriptInterface(new JSInterface(), "calculator");
     }
 
-    public Result setNum1(double num1) {
-        return calculator.setNum1(num1);
+    public void calcu(String s) {
+        Log.d(TAG, "calcu: s=" + s);
+        if (s.matches("[^a-zA-Z]*?[a-zA-z]+[^a-zA-Z]*?")) {
+            mainView.update("error");
+            return;
+        }
+        calculator.loadUrl("javascript:calculator.calcu(eval('" + s + "'))");
     }
 
-    public Result setNum2(double num2) {
-        return calculator.setNum2(num2);
+    class JSInterface {
+        @JavascriptInterface
+        public void calcu(String data) {
+            Log.d(TAG, "result: " + data);
+            handler.post(new resultThread(data));
+        }
     }
 
-    public Result setOP(int op) {
-        return calculator.setOP(op);
-    }
+    class resultThread implements Runnable {
+        String data;
 
-    public Result calcu() {
-        return calculator.calcu();
-    }
+        public resultThread(String data) {
+            this.data = data;
+        }
 
-    public int getOP() {
-        return calculator.getOP();
+        @Override
+        public void run() {
+            try {
+                Double.parseDouble(data);
+            } catch (Exception e) {
+                mainView.update("error");
+                return;
+            }
+            mainView.update(data);
+        }
     }
-
+}
+//    public Result setNum1(double num1) {
+//        return calculator.setNum1(num1);
+//    }
+//
+//    public Result setNum2(double num2) {
+//        return calculator.setNum2(num2);
+//    }
+//
+//    public Result setOP(int op) {
+//        return calculator.setOP(op);
+//    }
+//
+//    public Result calcu() {
+//        return calculator.calcu();
+//    }
+//
+//    public int getOP() {
+//        return calculator.getOP();
+//    }
 //    public Result calcu(String s) {
 //        Log.d("s", "calcu: "+s);
 //        ret = new Result();
@@ -74,4 +119,3 @@ public class MainPresenter {
 //        });
 //        return ret;
 //    }
-}
