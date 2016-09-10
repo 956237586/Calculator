@@ -14,6 +14,5 @@ public class Calculator extends WebView{
         super(context);
         getSettings().setJavaScriptEnabled(true);
         getSettings().setDomStorageEnabled(true);
-
     }
 }

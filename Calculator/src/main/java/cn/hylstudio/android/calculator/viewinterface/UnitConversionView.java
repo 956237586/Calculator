@@ -5,5 +5,9 @@ package cn.hylstudio.android.calculator.viewinterface;
  * Created by HYL on 2016/9/9.
  */
 public interface UnitConversionView extends TopView {
-
+    double getValue1();
+    double getValue2();
+    int getUnit1();
+    int getUnit2();
+    void setValue2(String value2);
 }
