@@ -5,14 +5,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
-
-import cn.hylstudio.android.calculator.R;
-
-
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,11 +12,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.hylstudio.android.calculator.model.Result;
+import cn.hylstudio.android.calculator.R;
 import cn.hylstudio.android.calculator.presenter.MainPresenter;
 import cn.hylstudio.android.calculator.viewinterface.MainView;
 
 /**
+ * 计算器主窗口
  * Created by HYL on 2016/8/30.
  */
 
@@ -124,26 +117,45 @@ public class MainActivity extends Activity implements MainView {
 
     }
 
+    /**
+     * 更新界面显示，增加一个运算符
+     * @param op 要增加的运算符
+     */
     @Override
     public void update(char op) {
         tv_result.setText(tv_result.getText().toString() + op);
     }
 
+    /**
+     * 更新界面显示，增加一位数字
+     * @param digit 要增加的数字
+     */
     @Override
     public void update(int digit) {
         tv_result.setText(tv_result.getText().toString() + digit);
     }
 
+    /**
+     * 更新界面显示，直接更新结果
+     * @param result
+     */
     @Override
     public void update(String result) {
         tv_result.setText(result);
     }
 
+    /**
+     * 清空结果文本框
+     */
     @Override
-    public void del() {
+    public void clear() {
         tv_result.setText("");
     }
 
+    /**
+     * 让运算符输入有效或无效
+     * @param isEnable 是否有效
+     */
     @Override
     public void setOPInputEnable(boolean isEnable) {
         btn_add.setEnabled(isEnable);
@@ -153,12 +165,19 @@ public class MainActivity extends Activity implements MainView {
         this.isOPPressed = !isEnable;
     }
 
+    /**
+     * 让小数点输入是否有效
+     * @param isEnable 有效或无效
+     */
     @Override
     public void setDotInputEnable(boolean isEnable) {
         btn_dot.setEnabled(isEnable);
         this.isDotPressed = !isEnable;
     }
 
+    /**
+     * 界面所有按钮的监听器
+     */
     public class ButtonClickListener implements View.OnClickListener {
 
         @Override
@@ -198,6 +217,7 @@ public class MainActivity extends Activity implements MainView {
                     update('.');
                     break;
                 case R.id.btn_enter:
+                    //事件处理向后层转移
                     presenter.calcu(tv_result.getText() + "");
                     break;
                 case R.id.btn_add:
@@ -213,9 +233,10 @@ public class MainActivity extends Activity implements MainView {
                     update('/');
                     break;
                 case R.id.btn_del:
-                    del();
+                    clear();
                     break;
                 case R.id.btn_calculator_to_unit_convert:
+                    //跳转到单位转换界面
                     Intent intent = new Intent(MainActivity.this,UnitConversionActivity.class);
                     startActivity(intent);
                     break;

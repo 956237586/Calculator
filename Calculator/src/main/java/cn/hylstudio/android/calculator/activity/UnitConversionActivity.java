@@ -8,6 +8,9 @@ import android.widget.Button;
 import cn.hylstudio.android.calculator.R;
 import cn.hylstudio.android.calculator.viewinterface.UnitConversionView;
 
+/**
+ *
+ */
 public class UnitConversionActivity extends AppCompatActivity implements UnitConversionView {
     private Button btn_toCalculator;
 

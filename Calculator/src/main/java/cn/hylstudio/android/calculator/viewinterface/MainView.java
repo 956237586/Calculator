@@ -1,6 +1,7 @@
 package cn.hylstudio.android.calculator.viewinterface;
 
 /**
+ * 计算器视图接口，定义了可能需要的接口。
  * Created by HYL on 2016/9/8.
  */
 public interface MainView extends TopView{
@@ -15,7 +16,7 @@ public interface MainView extends TopView{
     /**
      * 删除一位
      */
-    void del();
+    void clear();
 
     /**
      * 设置所有符号输入

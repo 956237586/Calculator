@@ -7,10 +7,12 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import cn.hylstudio.android.calculator.model.Calculator;
 import cn.hylstudio.android.calculator.model.Result;
 import cn.hylstudio.android.calculator.viewinterface.MainView;
 
 /**
+ * 计算器界面presenter。
  * 展示了多种方法计算表达式结果。
  * Created by HYL on 2016/9/8.
  */
@@ -19,36 +21,54 @@ public class MainPresenter {
 
     private MainView mainView;
     private Handler handler;
-    private WebView calculator;
+    private Calculator calculator;
     private Result ret;
 
     @SuppressLint("SetJavaScriptEnabled")
     public MainPresenter(MainView mainView) {
         this.mainView = mainView;
         handler = new Handler();
-        calculator = new WebView((Context) mainView);
-        calculator.getSettings().setJavaScriptEnabled(true);
-        calculator.getSettings().setDomStorageEnabled(true);
+
+        //计算组件初始化，借助js来计算表达式
+        calculator = new Calculator((Context) mainView);
+        //增加js接口方便调用js计算
         calculator.addJavascriptInterface(new JSInterface(), "calculator");
     }
 
-    public void calcu(String s) {
-        Log.d(TAG, "calcu: s=" + s);
-        if (s.matches("[^a-zA-Z]*?[a-zA-z]+[^a-zA-Z]*?")) {
+    /**
+     * 计算方法，接收表达式并计算
+     * @param expression 表达式
+     */
+    public void calcu(String expression) {
+        Log.d(TAG, "show: expression=" + expression);
+        //如果不合法则显示错误
+        if (expression.matches("[^a-zA-Z]*?[a-zA-z]+[^a-zA-Z]*?")) {
             mainView.update("error");
             return;
         }
-        calculator.loadUrl("javascript:calculator.calcu(eval('" + s + "'))");
+        //否则调用js来计算表达式，并通过js回调Java的方法来传递结果
+        calculator.loadUrl("javascript:calculator.show(eval('" + expression + "'))");
     }
 
+    /**
+     * Js接口
+     */
     class JSInterface {
+        /**
+         * js计算结果显示接口
+         * @param result
+         */
         @JavascriptInterface
-        public void calcu(String data) {
-            Log.d(TAG, "result: " + data);
-            handler.post(new resultThread(data));
+        public void show(String result) {
+            Log.d(TAG, "result: " + result);
+            //把结果更新
+            handler.post(new resultThread(result));
         }
     }
 
+    /**
+     * 结果更新线程
+     */
     class resultThread implements Runnable {
         String data;
 
@@ -59,63 +79,14 @@ public class MainPresenter {
         @Override
         public void run() {
             try {
+                //如果结果有问题，调用view层显示错误。
                 Double.parseDouble(data);
             } catch (Exception e) {
                 mainView.update("error");
                 return;
             }
+            //否则更新结果
             mainView.update(data);
         }
     }
 }
-//    public Result setNum1(double num1) {
-//        return calculator.setNum1(num1);
-//    }
-//
-//    public Result setNum2(double num2) {
-//        return calculator.setNum2(num2);
-//    }
-//
-//    public Result setOP(int op) {
-//        return calculator.setOP(op);
-//    }
-//
-//    public Result calcu() {
-//        return calculator.calcu();
-//    }
-//
-//    public int getOP() {
-//        return calculator.getOP();
-//    }
-//    public Result calcu(String s) {
-//        Log.d("s", "calcu: "+s);
-//        ret = new Result();
-//        AsyncHttpClient client = new AsyncHttpClient();
-//        s = Uri.encode(s);
-//        Log.d("s", "calcu: "+s);
-//        client.get("http://android.hylstudio.cn/calcu.php?s=" + s, new AsyncHttpResponseHandler() {
-//
-//            @Override
-//            public void onStart() {
-//                // called b1efore request is started
-//            }
-//
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-//                Log.d("result", "onSuccess: " + new String(response));
-//                ret.type = Result.SUCCESS;
-//                ret.msg = new String(response);
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-//                // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-//            }
-//
-//            @Override
-//            public void onRetry(int retryNo) {
-//                // called when request is retried
-//            }
-//        });
-//        return ret;
-//    }
